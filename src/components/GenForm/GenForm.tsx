@@ -105,6 +105,7 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
                             label: classes.textareaLabel,
                             input: classes.textareaInput,
                         }}
+                        onChange={(event) => {if(event.currentTarget.value.slice(-1) === '\n') handleClick()}}
                     />
                     <Stack>
                         <Button onClick={handleClick}>Submit</Button>
