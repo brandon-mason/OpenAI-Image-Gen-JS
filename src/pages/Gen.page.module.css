@@ -1,0 +1,11 @@
+.comp-0 {
+    max-height: 30%;
+    overflow: hidden;
+    object-fit: contain;
+}
+
+.comp-1 {
+    
+    align-self: end;
+    flex-grow: 1;
+}
