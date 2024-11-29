@@ -1,7 +1,12 @@
 html, body {
-    height: 100vh;
-    min-height: 100vh !important;
+    height: 87vh;
+    min-height: 87vh !important;
     background-color: rgb(36, 36, 36);
+
+    @media (min-width: 400px) {
+        height: 100vh;
+        min-height: 100vh !important;
+    }
 }
 
 #root {
