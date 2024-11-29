@@ -1,4 +1,13 @@
 .inputRoot {
-    width: 40%;
+    width: 90%;
+}
+.inputInput {
+    background-color: rgb(46, 46, 46);
+    border-bottom-color: rgb(66, 66, 66);
+    border-color: rgb(66, 66, 66);
+    color: white;
 }
 
+.inputLabel {
+    color: white;
+}

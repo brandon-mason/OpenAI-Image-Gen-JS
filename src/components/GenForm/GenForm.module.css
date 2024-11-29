@@ -1,0 +1,15 @@
+.textRoot {
+    color: red;
+    font-size: 12px;
+}
+
+.textareaLabel {
+    color: white;
+}
+
+.textareaInput {
+    background-color: rgb(46, 46, 46);
+    border-bottom-color: rgb(66, 66, 66);
+    border-color: rgb(66, 66, 66);
+    color: white;
+}

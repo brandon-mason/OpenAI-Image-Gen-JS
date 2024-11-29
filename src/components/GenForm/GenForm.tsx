@@ -1,44 +1,117 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from '@mantine/form';
-import { Button, Stack, Textarea, Image } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
+import { Button, Stack, Textarea, Text } from '@mantine/core';
+import axios from 'axios';
 import classes from './GenForm.module.css';
+import loading from '../../assets/loading.gif';
 
 interface GenFormProps {
     setImageLink: React.Dispatch<React.SetStateAction<string>>;
+    setImages: React.Dispatch<React.SetStateAction<{url: string, prompt: string}[]>>
+    images: {url: string, prompt: string}[];
 }
 
-const GenForm: React.FC<GenFormProps> = ({ setImageLink }) => {
+const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) => {
+    const navigate = useNavigate();
     const form = useForm({
         mode: 'uncontrolled',
         initialValues: {
             model: 'dall-e-3',
             prompt: '',
+            size: '1024x1024',
+            user: 'bjm241'
+
         },
     });
-    const [input, setInput] = useState<string>('');
+    const [errorMsg, setErrorMsg] = useState<string>(' ');
+    const [disabled, setDisabled] = useState<boolean>(false);
+    const sess = window.localStorage.getItem("auth");
+    const ref = useRef<HTMLTextAreaElement>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInput(e.target.value);
+    const badAuthRedirect = () => {
+        var i = 2;
+        setErrorMsg("You must be logged in to use this site. Redirecting in: 3");
+        setInterval(() => {
+            if(i === 0) {
+                navigate("/");
+            }
+            setErrorMsg("You must be logged in to use this site. Redirecting in: " + i);
+            i--;
+        }, 1000);
+    }
+    
+    const requestImage = async () => {
+        axios.post("https://api.openai.com/v1/images/generations", 
+            form.getValues(), {
+                headers: {
+                    'Authorization': `Bearer ${import.meta.env.VITE_KEY}`,
+                    'Content-Type': 'application/json',
+                }
+            }
+        ).then((response) => {
+            setImages([...images, {url: response.data.data[0].url, prompt: form.getValues().prompt}]);
+            setImageLink(response.data.data[0].url);
+            setDisabled(false);
+        }).catch((error) => {
+            setImageLink(images[images.length - 1].url);
+            setDisabled(false);
+            setErrorMsg(error.response.data.error.message);
+            setTimeout(() => {
+                setErrorMsg(" ");
+            }, 2000);
+        });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setImageLink(input);
+    const handleClick = () => {
+        if(sess === "true") {
+            if(ref.current) {
+                if(ref.current.value.length > 0) {
+                    form.setValues({prompt: ref.current.value});
+                    setImageLink(loading);
+                    setDisabled(true);
+                    requestImage();
+                } else {
+                    setErrorMsg("Prompt cannot be empty");
+                    setTimeout(() => {
+                        setErrorMsg(" ");
+                    }, 2000);
+                }
+            }
+        } else {
+            badAuthRedirect();
+        }
     };
+
+    useEffect(() => {
+        if(sess !== "true")
+            badAuthRedirect();
+    }, []);
 
     return (
-        <form onSubmit={handleSubmit}>
-            <Stack gap="xl" justify="center" align="stretch">
-                <Textarea 
-                    label="Prompt"
-                    placeholder="Prompt"
-                    autosize
-                    minRows={3}
-                    key={form.key("prompt")}
-                    {...form.getInputProps('name')}
-                />
-                <Button type="submit">Submit</Button>
-            </Stack>
+        <form>
+            <fieldset disabled={disabled}>
+                <Stack gap="lg" justify="center" align="stretch">
+                    <Textarea 
+                        label="Prompt"
+                        placeholder="Prompt"
+                        autosize
+                        minRows={3}
+                        ref={ref}
+                        key={form.key("prompt")}
+                        {...form.getInputProps("prompt")}
+                        classNames={{
+                            root: classes.textareaRoot,
+                            label: classes.textareaLabel,
+                            input: classes.textareaInput,
+                        }}
+                    />
+                    <Stack>
+                        <Button onClick={handleClick}>Submit</Button>
+                        <Text classNames={{root: classes.textRoot}}>{errorMsg}</Text>
+                    </Stack>
+                </Stack>
+            </fieldset>
         </form>
     );
 };

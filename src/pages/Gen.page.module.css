@@ -9,3 +9,7 @@
     align-self: end;
     flex-grow: 1;
 }
+
+.stackRoot {
+    margin-top: 3em;
+}

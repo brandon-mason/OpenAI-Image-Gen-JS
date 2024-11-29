@@ -1,0 +1,16 @@
+.buttonRoot {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+}
+
+.drawerRoot {
+    background-color: #242424;
+}
+
+.imgRoot {
+    width: 100%;
+    background-color: transparent;
+    border-top: 1px solid #424242;
+    border-bottom: 1px solid #424242;
+}
