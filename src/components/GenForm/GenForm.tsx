@@ -3,6 +3,7 @@ import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import { Button, Stack, Textarea, Text } from '@mantine/core';
 import axios from 'axios';
+import AudioParser from '../AudioParser/AudioParser';
 import classes from './GenForm.module.css';
 import loading from '../../assets/loading.gif';
 
@@ -13,6 +14,9 @@ interface GenFormProps {
 }
 
 const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) => {
+    const [errorMsg, setErrorMsg] = useState<string>(' ');
+    const [disabled, setDisabled] = useState<boolean>(false);
+    const [textareaVal, setTextareaVal] = useState<string>('');
     const navigate = useNavigate();
     const form = useForm({
         mode: 'uncontrolled',
@@ -24,8 +28,6 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
 
         },
     });
-    const [errorMsg, setErrorMsg] = useState<string>(' ');
-    const [disabled, setDisabled] = useState<boolean>(false);
     const sess = window.localStorage.getItem("auth");
     const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -50,7 +52,7 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
                 }
             }
         ).then((response) => {
-            setImages([...images, {url: response.data.data[0].url, prompt: form.getValues().prompt}]);
+            setImages([...images, {url: response.data.data[0].url, prompt: textareaVal}]);
             setImageLink(response.data.data[0].url);
             setDisabled(false);
         }).catch((error) => {
@@ -83,6 +85,26 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
         }
     };
 
+    const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setTextareaVal(event.currentTarget.value);
+    }
+
+    useEffect(() => {
+        if(textareaVal.slice(-1) === '\n' && ref.current) {
+            ref.current.value = textareaVal.slice(0, -1);
+            setTextareaVal(textareaVal.slice(0, -1));
+            handleClick();
+        }
+    }, [textareaVal]);
+
+    useEffect(() => {
+        if(ref.current) {
+            let length = ref.current.value.length;
+            ref.current.focus();
+            ref.current.setSelectionRange(length, length);
+        }
+    }, [disabled]);
+
     useEffect(() => {
         if(sess !== "true")
             badAuthRedirect();
@@ -95,6 +117,7 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
                     <Textarea 
                         label="Prompt"
                         placeholder="Prompt"
+                        value={textareaVal}
                         autosize
                         minRows={3}
                         ref={ref}
@@ -105,7 +128,7 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
                             label: classes.textareaLabel,
                             input: classes.textareaInput,
                         }}
-                        onChange={(event) => {if(event.currentTarget.value.slice(-1) === '\n') handleClick()}}
+                        onChange={(event) => handleChange(event)}
                     />
                     <Stack>
                         <Button onClick={handleClick}>Submit</Button>
