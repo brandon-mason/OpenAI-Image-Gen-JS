@@ -3,7 +3,6 @@ import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import { Button, Stack, Textarea, Text } from '@mantine/core';
 import axios from 'axios';
-import AudioParser from '../AudioParser/AudioParser';
 import classes from './GenForm.module.css';
 import loading from '../../assets/loading.gif';
 
