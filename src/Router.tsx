@@ -5,7 +5,8 @@ import GenPage from './pages/Gen.page';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <LoginPage />,
+    // Skips login page if password environment variable is not set.
+    element: (typeof import.meta.env.VITE_PW !== "undefined") ? <LoginPage /> : <GenPage />,
   }, 
   {
     path: '/generator',

@@ -31,15 +31,18 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
     const ref = useRef<HTMLTextAreaElement>(null);
 
     const badAuthRedirect = () => {
-        var i = 2;
-        setErrorMsg("You must be logged in to use this site. Redirecting in: 3");
-        setInterval(() => {
-            if(i === 0) {
-                navigate("/");
-            }
-            setErrorMsg("You must be logged in to use this site. Redirecting in: " + i);
-            i--;
-        }, 1000);
+        // If no password is set in the environment variables, authorization is not required.
+        if(typeof import.meta.env.VITE_PW !== "undefined") {
+            var i = 2;
+            setErrorMsg("You must be logged in to use this site. Redirecting in: 3");
+            setInterval(() => {
+                if(i === 0) {
+                    navigate("/");
+                }
+                setErrorMsg("You must be logged in to use this site. Redirecting in: " + i);
+                i--;
+            }, 1000);
+        }
     }
     
     const requestImage = async () => {
@@ -65,7 +68,7 @@ const GenForm: React.FC<GenFormProps> = ({ images, setImageLink, setImages }) =>
     };
 
     const handleClick = () => {
-        if(sess === "true") {
+        if(sess === "true" || typeof import.meta.env.VITE_PW === "undefined") {
             if(ref.current) {
                 if(ref.current.value.length > 0) {
                     form.setValues({prompt: ref.current.value});
